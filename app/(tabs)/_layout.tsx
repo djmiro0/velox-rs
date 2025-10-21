@@ -55,7 +55,7 @@ const TabLayout = () => {
         options={{
           title: "",
           tabBarIcon: ({ color }) => (
-            <Entypo name="home" size={30} color={color} />
+            <Entypo name="direction" size={30} color={color} />
           ),
         }}
       />

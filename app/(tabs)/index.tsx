@@ -1,18 +1,40 @@
-import React from 'react';
-import { StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { View, Text } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
+import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 export default function TabOneScreen() {
   const { theme } = useTheme();
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const alerts = [
     { id: '1', type: 'Speed Camera', distance: '350 m', icon: 'speedometer-outline', color: theme.colors.attention },
     { id: '2', type: 'Traffic Jam', distance: '1.2 km', icon: 'car-outline', color: theme.colors.tertiary },
     { id: '3', type: 'Police Report', distance: '2.1 km', icon: 'shield-checkmark-outline', color: theme.colors.primary },
   ];
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to access location was denied');
+        setLoading(false);
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({});
+      setLocation({
+        latitude: loc.coords.latitude,
+        longitude: loc.coords.longitude,
+      });
+      setLoading(false);
+    })();
+  }, []);
 
   const renderAlert = ({ item }: any) => (
     <TouchableOpacity style={[styles.alertCard, { backgroundColor: theme.colors.surface }]}>
@@ -37,9 +59,30 @@ export default function TabOneScreen() {
               <Text style={[styles.appTitle, { color: theme.colors.attention }]}>VeloxRS</Text>
             </View>
 
-            <View style={[styles.mapPlaceholder, { backgroundColor: theme.colors.tint }]}>
-              <Ionicons name="map-outline" size={60} color={theme.colors.disabledText} />
-              <Text style={[styles.mapText, { color: theme.colors.disabledText }]}>Map view coming soon...</Text>
+            <View style={styles.mapContainer}>
+              {loading ? (
+                <ActivityIndicator size="large" color={theme.colors.attention} />
+              ) : location ? (
+                <MapView
+                  style={styles.map}
+                  initialRegion={{
+                    latitude: location.latitude,
+                    longitude: location.longitude,
+                    latitudeDelta: 0.01,
+                    longitudeDelta: 0.01,
+                  }}
+                  showsUserLocation
+                >
+                  <Marker
+                    coordinate={{ latitude: location.latitude, longitude: location.longitude }}
+                    title="You are here"
+                  />
+                </MapView>
+              ) : (
+                <Text style={[styles.mapText, { color: theme.colors.disabledText }]}>
+                  Location not available
+                </Text>
+              )}
             </View>
 
             <Text style={[styles.sectionTitle, { color: theme.colors.text }]}>Nearby Alerts</Text>
@@ -66,16 +109,19 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
   },
-  mapPlaceholder: {
+  mapContainer: {
     height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 16,
     marginHorizontal: 16,
     marginTop: 10,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  map: {
+    flex: 1,
   },
   mapText: {
     marginTop: 8,
+    textAlign: 'center',
   },
   sectionTitle: {
     fontSize: 18,

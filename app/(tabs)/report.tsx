@@ -1,9 +1,11 @@
-import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Dimensions, Animated } from 'react-native';
 import { Text, View } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
+
+const { height } = Dimensions.get('window');
 
 export default function ReportScreen() {
   const { theme } = useTheme();
@@ -16,65 +18,101 @@ export default function ReportScreen() {
 
   const handleReport = (option: string) => {
     alert(`Reported: ${option}`);
-    // TODO: connect to backend or local state
   };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <Text style={[styles.title, { color: theme.colors.text }]}>Report an Issue</Text>
-      <Text style={[styles.subtitle, { color: theme.colors.disabledText }]}>
-        Select one of the options below:
-      </Text>
 
       <View style={styles.optionsContainer}>
         {reportOptions.map((option) => (
-          <TouchableOpacity
+          <PressableButton
             key={option.id}
-            style={[styles.optionButton, { backgroundColor: option.color }]}
-            activeOpacity={0.8}
+            title={option.title}
+            icon={option.icon}
+            color={option.color}
+            theme={theme}
             onPress={() => handleReport(option.title)}
-          >
-            <Ionicons name={option.icon as any} size={36} color="#fff" />
-            <Text style={styles.optionText}>{option.title}</Text>
-          </TouchableOpacity>
+          />
         ))}
       </View>
     </SafeAreaView>
   );
 }
 
+// Custom Pressable with scale effect
+function PressableButton({ title, icon, color, theme, onPress }: any) {
+  const scale = new Animated.Value(1);
+
+  const handlePressIn = () => {
+    Animated.spring(scale, {
+      toValue: 0.95,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 3,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <AnimatedPressable
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[
+          styles.optionButton,
+          { backgroundColor: color },
+        ]}
+      >
+        <Ionicons name={icon as any} size={48} color={theme.colors.text} />
+        <Text style={[styles.optionText, { color: theme.colors.text }]}>{title}</Text>
+      </AnimatedPressable>
+    </Animated.View>
+  );
+}
+
+// Animated wrapper for TouchableOpacity
+const AnimatedPressable = Animated.createAnimatedComponent(require('react-native').TouchableOpacity);
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
     alignItems: 'center',
+    paddingHorizontal: 20,
+    justifyContent: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    marginTop: 30,
-    marginBottom: 10,
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 30,
+    marginVertical: 20,
   },
   optionsContainer: {
     width: '100%',
-    justifyContent: 'space-between',
+    flex: 1,
+    justifyContent: 'space-evenly',
   },
   optionButton: {
-    flexDirection: 'row',
+    width: '100%',
+    height: height * 0.18,
+    borderRadius: 20,
+    justifyContent: 'center',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 20,
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 5 },
   },
   optionText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#fff',
-    marginLeft: 15,
+    fontSize: 24,
+    fontWeight: '700',
+    marginTop: 10,
   },
 });
