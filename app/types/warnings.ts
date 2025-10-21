@@ -1,5 +1,1 @@
-export interface WarningTypes {
-  camera: string;
-  roadworks: string;
-  traffic: string;
-}
+export type WarningType = 'camera' | 'roadwork' | 'traffic';
