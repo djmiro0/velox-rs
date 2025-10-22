@@ -13,13 +13,13 @@ if (!extra) {
 }
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBFjy12g08h6TER28pr_f6TVkFDXBj5hXI",
-  authDomain: "veloxrs.firebaseapp.com",
-  projectId: "veloxrs",
-  storageBucket: "veloxrs.firebasestorage.app",
-  messagingSenderId: "613071268609",
-  appId: "1:613071268609:web:76aab94a9dded9c8b88900",
-  measurementId: "G-H9LP93R75C"
+  apiKey: extra.apiKey,
+  authDomain: extra.authDomain,
+  projectId: extra.projectId,
+  storageBucket: extra.storageBucket,
+  messagingSenderId: extra.messagingSenderId,
+  appId: extra.appId,
+  measurementId: extra.measurementId,
 };
 
 const FIREBASE_APP =

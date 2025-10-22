@@ -7,6 +7,7 @@ import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import getDistanceInMeters from '../helpers/getDistance';
 import { Ionicons } from '@expo/vector-icons';
+import LoadingContainer from '@/components/LoadingContainer';
 
 // 👇 Importuj funkciju za fetch
 import { fetchReports, Report } from '../utils/reports';
@@ -97,6 +98,9 @@ useEffect(() => {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {loading || !location ? (
+    <LoadingContainer message="Učitavanje lokacije i izveštaja..." />
+  ) : (
       <FlatList
         data={[]} // više ti ne trebaju "fake" alerts
         keyExtractor={(item) => item}
@@ -192,7 +196,7 @@ useEffect(() => {
 
           </>
         }
-      />
+      />)}
     </SafeAreaView>
   );
 }
