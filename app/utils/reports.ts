@@ -1,7 +1,6 @@
-import { collection, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, addDoc, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { FIRESTORE_DB } from "@/firebaseConfig";
-import { WarningType } from "../types/warnings";
 
 export interface Report {
   id?: string;
@@ -12,8 +11,7 @@ export interface Report {
   userId?: string;
 }
 
-
-// 🔹 Kreiranje novog izveštaja (kamerа, radovi, gužva)
+// 🔹 Kreiranje novog izveštaja (kamera, radovi, gužva)
 export const createReport = async (
   type: string,
   latitude: number,
@@ -47,6 +45,22 @@ export const deleteReport = async (id: string) => {
     console.log("✅ Report deleted:", id);
   } catch (error: any) {
     console.error("❌ Error deleting report:", error.message);
+    throw error;
+  }
+};
+
+// 🔹 Učitavanje svih izveštaja
+export const fetchReports = async (): Promise<Report[]> => {
+  try {
+    const snapshot = await getDocs(collection(FIRESTORE_DB, "reports"));
+    const reports: Report[] = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...(docSnap.data() as Omit<Report, "id">),
+    }));
+    console.log(`📥 Loaded ${reports.length} reports`);
+    return reports;
+  } catch (error: any) {
+    console.error("❌ Error fetching reports:", error.message);
     throw error;
   }
 };
