@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
 import { View, Text } from '@/components/Themed';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../context/ThemeContext';
-import MapView, { Marker } from 'react-native-maps';
-import * as Location from 'expo-location';
 import getDistanceInMeters from '../helpers/getDistance';
 import { Ionicons } from '@expo/vector-icons';
 import LoadingContainer from '@/components/LoadingContainer';
+import Map from '@/components/Map';
+import * as Location from 'expo-location';
+import getMarkerIcon from '../helpers/getMarkerIcon';
 
 // 👇 Importuj funkciju za fetch
 import { fetchReports, Report } from '../utils/reports';
@@ -18,24 +19,24 @@ export default function TabOneScreen() {
   const [loading, setLoading] = useState(true);
   const [reports, setReports] = useState<Report[]>([]);
 
-  // 🔹 Uzimanje trenutne lokacije
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Permission to access location was denied');
-        setLoading(false);
-        return;
-      }
-
-      const loc = await Location.getCurrentPositionAsync({});
-      setLocation({
-        latitude: loc.coords.latitude,
-        longitude: loc.coords.longitude,
-      });
-      setLoading(false);
-    })();
-  }, []);
+      // 🔹 Uzimanje trenutne lokacije
+      useEffect(() => {
+        (async () => {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status !== 'granted') {
+            alert('Permission to access location was denied');
+            setLoading(false);
+            return;
+          }
+    
+          const loc = await Location.getCurrentPositionAsync({});
+          setLocation({
+            latitude: loc.coords.latitude,
+            longitude: loc.coords.longitude,
+          });
+          setLoading(false);
+        })();
+      }, []);
 
   // 🔹 Fetch Firestore reports
   useEffect(() => {
@@ -75,27 +76,6 @@ useEffect(() => {
 }, [location, reports]);
 
 
-  // 🔹 Odredi boju markera prema tipu izveštaja
-  const getMarkerColor = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'kamera':
-      case 'kamera:':
-      case 'camera':
-        return 'red';
-      case 'radovi':
-      case 'work':
-      case 'construction':
-        return 'yellow';
-      case 'gužva':
-      case 'guzva':
-      case 'traffic':
-      case 'jam':
-        return 'orange';
-      default:
-        return 'blue';
-    }
-  };
-
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {loading || !location ? (
@@ -107,53 +87,32 @@ useEffect(() => {
         renderItem={() => null}
         ListHeaderComponent={
           <>
-            <View
-              style={[
-                styles.header,
-                { backgroundColor: theme.colors.surface, borderBottomColor: theme.colors.borderColor },
-              ]}
-            >
-              <Text style={[styles.appTitle, { color: theme.colors.attention }]}>VeloxRS</Text>
-            </View>
-
+     <View
+  style={[
+    styles.header,
+    {
+      backgroundColor: theme.colors.surface,
+      borderBottomColor: theme.colors.borderColor,
+    },
+  ]}
+>
+  <Image
+    source={require('@/assets/images/logo-transparent-png.png')}
+    style={styles.logo}
+  />
+</View>
             <View style={styles.mapContainer}>
               {loading ? (
                 <ActivityIndicator size="large" color={theme.colors.attention} />
               ) : location ? (
-                <MapView
-                  style={styles.map}
-                  initialRegion={{
-                    latitude: location.latitude,
-                    longitude: location.longitude,
-                    latitudeDelta: 0.02,
-                    longitudeDelta: 0.02,
-                  }}
-                  showsUserLocation
-                >
-                  {/* 🔹 Trenutna lokacija */}
-                  <Marker
-                    coordinate={{ latitude: location.latitude, longitude: location.longitude }}
-                    title="You are here"
-                    pinColor="blue"
-                  />
-
-                  {/* 🔹 Markeri iz Firestore-a */}
-                  {reports.map((r) => (
-                    <Marker
-                      key={r.id}
-                      coordinate={{ latitude: r.latitude, longitude: r.longitude }}
-                      title={r.type}
-                      description={new Date(r.timestamp).toLocaleString()}
-                      pinColor={getMarkerColor(r.type)}
-                    />
-                  ))}
-                </MapView>
+                <Map latitude={location.latitude} longitude={location.longitude} reports={reports}/>
               ) : (
                 <Text style={[styles.mapText, { color: theme.colors.disabledText }]}>
-                  Location not available
+                  Lokacija nije dostupna
                 </Text>
               )}
             </View>
+            
 {nearestReport ? (
   <View
     style={[
@@ -161,16 +120,9 @@ useEffect(() => {
       { backgroundColor: theme.colors.surface, shadowColor: theme.colors.text },
     ]}
   >
-    <Ionicons
-      name="location-outline"
-      size={28}
-      color={theme.colors.attention}
-      style={{ marginRight: 10 }}
-    />
+<View style={{ marginRight: 10 }}>{getMarkerIcon(nearestReport.report.type)} </View>
+    
     <View>
-      <Text style={[styles.nearestTitle, { color: theme.colors.text }]}>
-        Najbliži izveštaj
-      </Text>
       <Text style={[styles.nearestText, { color: theme.colors.text }]}>
         {nearestReport.report.type.charAt(0).toUpperCase() +
           nearestReport.report.type.slice(1)}
@@ -185,7 +137,7 @@ useEffect(() => {
 ) : (
   <Text
     style={{
-      color: theme.colors.disabledText,
+      color: theme.colors.text,
       marginHorizontal: 20,
       marginBottom: 20,
     }}
@@ -193,7 +145,6 @@ useEffect(() => {
     Nema dostupnih izveštaja u blizini.
   </Text>
 )}
-
           </>
         }
       />)}
@@ -208,7 +159,6 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
     paddingTop: 60,
     paddingBottom: 20,
     borderBottomWidth: 1,
@@ -216,20 +166,6 @@ const styles = StyleSheet.create({
   appTitle: {
     fontSize: 30,
     fontWeight: '700',
-  },
-  mapContainer: {
-    height: 300,
-    marginHorizontal: 16,
-    marginVertical: 20,
-    borderRadius: 16,
-    overflow: 'hidden',
-  },
-  map: {
-    flex: 1,
-  },
-  mapText: {
-    marginTop: 8,
-    textAlign: 'center',
   },
   sectionTitle: {
     fontSize: 18,
@@ -241,7 +177,7 @@ const styles = StyleSheet.create({
   flexDirection: 'row',
   alignItems: 'center',
   marginHorizontal: 20,
-  marginBottom: 20,
+  marginTop: 20,
   padding: 14,
   borderRadius: 12,
   shadowOffset: { width: 0, height: 2 },
@@ -257,13 +193,29 @@ nearestTitle: {
 },
 
 nearestText: {
-  fontSize: 15,
+  fontSize: 20,
   fontWeight: '500',
 },
 
 nearestDistance: {
-  fontSize: 13,
+  fontSize: 18,
   marginTop: 2,
 },
-
+//map
+  mapContainer: {
+    height: 300,
+    marginHorizontal: 16,
+    marginVertical: 20,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  mapText: {
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  //logo
+    logo: {
+    width: 200,
+    height: 50,
+  },
 });

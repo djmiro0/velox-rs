@@ -1,10 +1,10 @@
 export const Colors = {
   light: {
-    primary: "#1C1C1E",         // True Black-ish, elegantno
+    primary: "#081B26",         // True Black-ish, elegantno
     primaryText: "#FFFFFF",      // White
     primaryLight: "#2C2C2E",     // Graphite Gray
-    secondary: "#F2F2F7",        // iOS Light Gray
-    tertiary: "#FF9500",         // iOS Orange Accent
+    secondary: "#5B98A6",        // iOS Light Gray
+    tertiary: "#D95E32",         // iOS Orange Accent
     text: "#1C1C1E",             // Dark text
     disabledText: "#8E8E93",     // iOS Disabled Gray
     selectedText: "#0A84FF",     // iOS Blue
@@ -12,7 +12,7 @@ export const Colors = {
     tint: "#E5E5EA",             // Light tint
     icon: "#1C1C1E",             // Black icons
     tabIconDefault: "#8E8E93",   // iOS default tab
-    tabIconSelected: "#FF9500",  // Accent tab
+    tabIconSelected: "#F28F6B",  // Accent tab
     buttonBackground: "#0A84FF", // iOS blue button
     buttonBackgroundDisabled: "#D1D1D6",
     inputBackground: "#F2F2F7",

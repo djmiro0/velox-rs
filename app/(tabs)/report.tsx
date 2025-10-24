@@ -4,7 +4,6 @@ import { Text, View } from '@/components/Themed';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
 import { useTheme } from '../context/ThemeContext';
 import { createReport } from '../utils/reports';
 

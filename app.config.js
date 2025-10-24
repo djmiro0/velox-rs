@@ -6,14 +6,13 @@ export default {
     slug: "VeloxRS",
     version: "1.0.0",
     orientation: "portrait",
-    icon: "./assets/images/icon.png",
+    icon: "./assets/images/logo-png.png",
     scheme: "veloxrs",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     splash: {
-      image: "./assets/images/splash-icon.png",
+      image: "./assets/images/logo-png.png",
       resizeMode: "contain",
-      backgroundColor: "#ffffff"
     },
     ios: {
       supportsTablet: true,
@@ -21,8 +20,7 @@ export default {
     },
     android: {
       adaptiveIcon: {
-        foregroundImage: "./assets/images/adaptive-icon.png",
-        backgroundColor: "#ffffff"
+        foregroundImage: "./assets/images/logo-png.png",
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
@@ -31,7 +29,7 @@ export default {
     web: {
       bundler: "metro",
       output: "static",
-      favicon: "./assets/images/favicon.png"
+      favicon: "./assets/images/logo-png.png"
     },
     plugins: [
       "expo-router"
